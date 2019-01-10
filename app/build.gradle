@@ -22,6 +22,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -30,7 +35,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0-alpha01'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
     implementation 'com.google.android.material:material:1.1.0-alpha02'
-    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'com.jakewharton:kotterknife:0.1.0-SNAPSHOT'
 
     implementation "androidx.fragment:fragment-ktx:1.0.0"
     implementation "androidx.core:core-ktx:1.0.1"
@@ -56,6 +61,21 @@ dependencies {
 
     implementation 'com.github.bumptech.glide:glide:4.8.0'
     kapt 'com.github.bumptech.glide:compiler:4.8.0'
+
+    // Rx java and friends
+    implementation "io.reactivex.rxjava2:rxjava:2.2.5"
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+    implementation 'io.reactivex.rxjava2:rxkotlin:2.3.0'
+    implementation 'com.jakewharton.rxbinding3:rxbinding:3.0.0-alpha1'
+    implementation 'com.jakewharton.rxbinding2:rxbinding-support-v4:2.2.0'
+    implementation 'com.jakewharton.rxbinding2:rxbinding-appcompat-v7:2.2.0'
+    implementation 'com.jakewharton.rxbinding2:rxbinding-recyclerview-v7:2.2.0'
+
+    // Networking
+    implementation 'com.squareup.okhttp3:okhttp:3.12.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.5.0'
+    implementation "com.squareup.retrofit2:converter-gson:2.5.0"
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'
