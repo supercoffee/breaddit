@@ -1,6 +1,5 @@
 package com.plusmobileapps.breaddit.data
 
-import androidx.lifecycle.LiveData
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.Gson
@@ -11,7 +10,7 @@ inline fun <reified T : Any> Gson.fromGson(response: String): T {
     return this.fromJson(response, T::class.java)
 }
 
-class RedditPostRepository(val apiFactory: RedditApiFactory) {
+class RedditPostRepository(val apiFactory: RedditApiFactory, val dao: RedditPostDao) {
 
     private val breadUrls = listOf(
         "https://www.reddit.com/r/breaddit/.json",
@@ -33,6 +32,8 @@ class RedditPostRepository(val apiFactory: RedditApiFactory) {
                 it.data.children.map{ item ->
                     mapNetworkToUiModel(item.data)
                 }
+            }.doOnNext {
+                dao.insertPosts(it)
             }
         }
 
@@ -42,8 +43,8 @@ class RedditPostRepository(val apiFactory: RedditApiFactory) {
             }
     }
 
-    fun getRedditPost(id: String): LiveData<RedditPost> {
-        TODO()
+    fun getRedditPost(id: String): Observable<RedditPost> {
+        return dao.getById(id)
     }
 
     private fun mapNetworkToUiModel(data: ApiRedditPost): RedditPost {

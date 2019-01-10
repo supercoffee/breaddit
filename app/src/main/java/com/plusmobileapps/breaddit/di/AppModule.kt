@@ -26,7 +26,7 @@ val appModule = module {
             .build()
     }
     single { get<AppDatabase>().redditPostDao() }
-    single { RedditPostRepository(get()) }
+    single { RedditPostRepository(get(), get()) }
     single { RedditApiFactory() }
 
     viewModel { MainViewModel(get()) }

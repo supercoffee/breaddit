@@ -2,25 +2,27 @@ package com.plusmobileapps.breaddit.view
 
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.lifecycle.Observer
+import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
-
 import com.plusmobileapps.breaddit.R
 import com.plusmobileapps.breaddit.viewmodels.RedditPostDetailViewModel
-import org.koin.android.viewmodel.ext.android.viewModel
-import java.lang.IllegalStateException
-
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_reddit_post_detail.*
+import org.koin.android.viewmodel.ext.android.viewModel
+
 
 class RedditPostDetailFragment : Fragment() {
 
     private val viewModel: RedditPostDetailViewModel by viewModel()
     private var redditPostId: String? = null
+
+    private lateinit var subscription: Disposable
 
     companion object {
 
@@ -43,20 +45,24 @@ class RedditPostDetailFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_reddit_post_detail, container, false)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        subscription.dispose()
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         if (redditPostId == null) {
             throw IllegalStateException("No id set for the reddit post to be retrieved")
         }
 
-        viewModel.loadRedditPost(redditPostId!!).observe(this, Observer { redditPost ->
-            title.text = redditPost.title
-            author.text = "u/${redditPost.author}"
-            Glide.with(this).load(redditPost.url).into(imageView)
-            self_text.text = redditPost.selfText
-
-        })
+        subscription = viewModel.loadRedditPost(redditPostId!!).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {redditPost ->
+                title.text = redditPost.title
+                author.text = "u/${redditPost.author}"
+                Glide.with(this).load(redditPost.url).into(imageView)
+                self_text.text = redditPost.selfText
+            }
     }
-
-
 }

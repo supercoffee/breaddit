@@ -1,11 +1,8 @@
 package com.plusmobileapps.breaddit.viewmodels
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import com.plusmobileapps.breaddit.SingleLiveEvent
 import com.plusmobileapps.breaddit.data.RedditPost
 import com.plusmobileapps.breaddit.data.RedditPostRepository
-import com.plusmobileapps.breaddit.view.RedditPostClickListener
 import io.reactivex.Single
 
 private const val AUTH_URL = "https://www.reddit.com/api/v1/authorize.compact?client_id=%s" +
@@ -21,26 +18,7 @@ private const val STATE = "MY_RANDOM_STRING_1"
 private const val ACCESS_TOKEN_URL = "https://www.reddit.com/api/v1/access_token"
 
 
-class MainViewModel(private val repository: RedditPostRepository) : ViewModel(), RedditPostClickListener {
+class MainViewModel(private val repository: RedditPostRepository) : ViewModel() {
 
     val redditPosts: Single<List<RedditPost>> = repository.load()
-    private val openRedditPostDetails = SingleLiveEvent<String>()
-
-    fun getOpenRedditPostDetails(): LiveData<String> = openRedditPostDetails
-
-    fun onLoginButtonClicked() {
-
-    }
-
-    override fun onPostClicked(redditPost: RedditPost) {
-        openRedditPostDetails.value = redditPost.id
-    }
-
-    override fun onUpVoteClicked(redditPost: RedditPost) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onDownVoteClicked(redditPost: RedditPost) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 }

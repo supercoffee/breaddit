@@ -70,6 +70,8 @@ dependencies {
     implementation 'com.jakewharton.rxbinding2:rxbinding-support-v4:2.2.0'
     implementation 'com.jakewharton.rxbinding2:rxbinding-appcompat-v7:2.2.0'
     implementation 'com.jakewharton.rxbinding2:rxbinding-recyclerview-v7:2.2.0'
+    implementation 'androidx.room:room-rxjava2:2.1.0-alpha03'
+
 
     // Networking
     implementation 'com.squareup.okhttp3:okhttp:3.12.0'
