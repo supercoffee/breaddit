@@ -6,6 +6,7 @@ import com.plusmobileapps.breaddit.SingleLiveEvent
 import com.plusmobileapps.breaddit.data.RedditPost
 import com.plusmobileapps.breaddit.data.RedditPostRepository
 import com.plusmobileapps.breaddit.view.RedditPostClickListener
+import io.reactivex.Single
 
 private const val AUTH_URL = "https://www.reddit.com/api/v1/authorize.compact?client_id=%s" +
         "&response_type=code&state=%s&redirect_uri=%s&" +
@@ -22,7 +23,7 @@ private const val ACCESS_TOKEN_URL = "https://www.reddit.com/api/v1/access_token
 
 class MainViewModel(private val repository: RedditPostRepository) : ViewModel(), RedditPostClickListener {
 
-    val redditPosts: LiveData<List<RedditPost>> = repository.load()
+    val redditPosts: Single<List<RedditPost>> = repository.load()
     private val openRedditPostDetails = SingleLiveEvent<String>()
 
     fun getOpenRedditPostDetails(): LiveData<String> = openRedditPostDetails

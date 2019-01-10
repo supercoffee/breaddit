@@ -1,24 +1,17 @@
 package com.plusmobileapps.breaddit.data
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import com.plusmobileapps.breaddit.logTag
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import okhttp3.*
-import org.json.JSONObject
-import java.io.IOException
+import io.reactivex.Observable
+import io.reactivex.Single
 
 inline fun <reified T : Any> Gson.fromGson(response: String): T {
     return this.fromJson(response, T::class.java)
 }
 
-class RedditPostRepository(private val dao: RedditPostDao, private val client: OkHttpClient, private val gson: Gson) {
+class RedditPostRepository(val apiFactory: RedditApiFactory) {
 
     private val breadUrls = listOf(
         "https://www.reddit.com/r/breaddit/.json",
@@ -26,55 +19,51 @@ class RedditPostRepository(private val dao: RedditPostDao, private val client: O
         "https://reddit.com/r/BreadStapledToTrees/.json",
         "https://www.reddit.com/r/GarlicBreadMemes/.json"
     )
+    private val breadSubreddits = listOf(
+        "breddit",
+        "Breadit",
+        "BreadStapledToTrees",
+        "GarlicBreadMemes"
+    )
 
-    fun load(): LiveData<List<RedditPost>> {
-        breadUrls.forEach { breadUrl ->
-            val request = Request.Builder().url(breadUrl).build()
-            client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    Log.e(logTag, "$request $e")
+    fun load(): Single<List<RedditPost>> {
+
+        val requests = breadSubreddits.map { subreddit ->
+            apiFactory.createApi().getFeed(subreddit).map {
+                it.data.children.map{ item ->
+                    mapNetworkToUiModel(item.data)
                 }
-
-                override fun onResponse(call: Call, response: Response) {
-                    val body = response.body()?.string() ?: return
-                    convertToRedditPosts(body)
-
-                }
-            })
+            }
         }
 
-        return dao.getPosts()
+        return Observable.merge(requests).toList()
+            .map {
+                it.flatten()
+            }
     }
 
     fun getRedditPost(id: String): LiveData<RedditPost> {
-        return dao.getById(id)
+        TODO()
     }
 
-    private fun convertToRedditPosts(bodyResponse: String) {
-        GlobalScope.launch(Dispatchers.IO) {
-            val response = gson.fromGson<RedditFeedResponse>(bodyResponse)
-            val redditPosts = response.data.children.map { redditFeedChild ->
-                val redditData = redditFeedChild.data
-                return@map RedditPost(
-                    id = redditData.id,
-                    author = redditData.author,
-                    title = redditData.title,
-                    selfText = redditData.selftext,
-                    subreddit_name_prefixed = redditData.subreddit_name_prefixed,
-                    score = redditData.score,
-                    created = redditData.created,
-                    num_comments = redditData.num_comments,
-                    permalink = redditData.permalink,
-                    url = redditData.url,
-                    subreddit_subscribers = redditData.subreddit_subscribers,
-                    created_utc = redditData.created_utc,
-//                            media = redditData.media,
-                    is_video = redditData.is_video,
-                    subreddit_id = redditData.subreddit_id
+    private fun mapNetworkToUiModel(data: ApiRedditPost): RedditPost {
+        return RedditPost(
+                    id = data.id,
+                    author = data.author,
+                    title = data.title,
+                    selfText = data.selftext,
+                    subreddit_name_prefixed = data.subreddit_name_prefixed,
+                    score = data.score,
+                    created = data.created,
+                    num_comments = data.num_comments,
+                    permalink = data.permalink,
+                    url = data.url,
+                    subreddit_subscribers = data.subreddit_subscribers,
+                    created_utc = data.created_utc,
+//                    media = data.media,
+                    is_video = data.is_video,
+                    subreddit_id = data.subreddit_id
                 )
-            }
-            dao.insertPosts(redditPosts)
-        }
     }
 
 }
