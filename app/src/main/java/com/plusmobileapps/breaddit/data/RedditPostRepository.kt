@@ -2,22 +2,11 @@ package com.plusmobileapps.breaddit.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.google.gson.Gson
 import io.reactivex.Observable
 import io.reactivex.Single
 
-inline fun <reified T : Any> Gson.fromGson(response: String): T {
-    return this.fromJson(response, T::class.java)
-}
-
 class RedditPostRepository(val apiFactory: RedditApiFactory, val dao: RedditPostDao) {
 
-    private val breadUrls = listOf(
-        "https://www.reddit.com/r/breaddit/.json",
-        "https://www.reddit.com/r/Breadit/.json",
-        "https://reddit.com/r/BreadStapledToTrees/.json",
-        "https://www.reddit.com/r/GarlicBreadMemes/.json"
-    )
     private val breadSubreddits = listOf(
         "breddit",
         "Breadit",
@@ -38,9 +27,7 @@ class RedditPostRepository(val apiFactory: RedditApiFactory, val dao: RedditPost
         }
 
         return Observable.merge(requests).toList()
-            .map {
-                it.flatten()
-            }
+            .map{ it.flatten() }
     }
 
     fun getRedditPost(id: String): Observable<RedditPost> {
