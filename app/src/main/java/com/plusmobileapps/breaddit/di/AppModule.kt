@@ -3,7 +3,7 @@ package com.plusmobileapps.breaddit.di
 import androidx.room.Room
 import com.google.gson.Gson
 import com.plusmobileapps.breaddit.data.AppDatabase
-import com.plusmobileapps.breaddit.data.RedditApiFactory
+import com.plusmobileapps.breaddit.data.RedditClientProvider
 import com.plusmobileapps.breaddit.data.RedditPostRepository
 import com.plusmobileapps.breaddit.viewmodels.MainViewModel
 import com.plusmobileapps.breaddit.viewmodels.RedditPostDetailViewModel
@@ -11,6 +11,7 @@ import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.viewmodel.ext.koin.viewModel
 import org.koin.dsl.module.module
+
 
 val appModule = module {
 
@@ -27,7 +28,7 @@ val appModule = module {
     }
     single { get<AppDatabase>().redditPostDao() }
     single { RedditPostRepository(get(), get()) }
-    single { RedditApiFactory() }
+    single { RedditClientProvider() }
 
     viewModel { MainViewModel(get()) }
     viewModel { RedditPostDetailViewModel(get()) }

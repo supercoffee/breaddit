@@ -4,21 +4,25 @@ import androidx.lifecycle.ViewModel
 import com.plusmobileapps.breaddit.data.RedditPost
 import com.plusmobileapps.breaddit.data.RedditPostRepository
 import io.reactivex.Single
-
-private const val AUTH_URL = "https://www.reddit.com/api/v1/authorize.compact?client_id=%s" +
-        "&response_type=code&state=%s&redirect_uri=%s&" +
-        "duration=permanent&scope=identity"
-
-private const val CLIENT_ID = "kV9k939bhxpvyg"
-
-private const val REDIRECT_URI = "https://plusmobileapps.com/breaddit"
-
-private const val STATE = "MY_RANDOM_STRING_1"
-
-private const val ACCESS_TOKEN_URL = "https://www.reddit.com/api/v1/access_token"
-
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 
 class MainViewModel(private val repository: RedditPostRepository) : ViewModel() {
 
-    val redditPosts: Single<List<RedditPost>> = repository.load()
+    private val breadSubreddits = listOf(
+        "breddit",
+        "Breadit",
+        "BreadStapledToTrees",
+        "GarlicBreadMemes"
+    )
+
+    val redditPosts by lazy {
+        val subredditPosts: List<Single<List<RedditPost>>> = breadSubreddits.map {
+            repository.posts(it)
+        }
+
+        Single.merge(subredditPosts)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+    }
 }
